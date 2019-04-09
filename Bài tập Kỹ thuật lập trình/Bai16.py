@@ -23,9 +23,9 @@ for i in range(n):
     if isPrime(i):
         # Mersen = 2^n - 1
         # -> Tìm n = log2(Mersen + 1)
-        n = math.log2(i + 1)
+        p = math.log2(i + 1)
         # Kiểm tra n là số nguyên và n là số nguyên tố
-        if n == int(n) and isPrime(int(n)):
+        if p == int(p) and isPrime(int(p)):
             # Mersen = 2^n - 1
-           mersen = math.pow(2, n) - 1
-           print(mersen, end = ' ')
+           mersen = math.pow(2, p) - 1
+           print("{0} = 2^{1} - 1".format(mersen, p))

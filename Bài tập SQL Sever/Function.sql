@@ -88,12 +88,12 @@ SELECT * FROM Promotion(N'Ngày bình thường')
 
 -- 8. Viết hàm kiểm tra một số có phải số hoàn hảo hay không
 CREATE FUNCTION KiemTraSoHoanHao(@n INT)
-RETURNS NVARCHAR(50)
+RETURNS BIT
 AS
 BEGIN
 	DECLARE @i INT
 	DECLARE @tongUoc INT
-	DECLARE @kq NVARCHAR(50)
+	DECLARE @kq BIT
 	SET @i = 1
 	SET @tongUoc = 0
 	WHILE @i < @n
@@ -105,14 +105,14 @@ BEGIN
 			SET @i = @i + 1
 		END
 	IF @tongUoc = @n
-		SELECT @kq = N'Là số hoàn hảo'
+		SELECT @kq = 1
 	ELSE
-		SELECT @kq = N'Không là số hoàn hảo'
+		SELECT @kq = 0
 	RETURN @kq
 END
 
 DECLARE @k NVARCHAR(50)
-EXEC @k = KiemTraSoHoanHao 5
+EXEC @k = KiemTraSoHoanHao 28
 SELECT @k
 
 -- 9. Viếm hàm tìm ước chung lớn nhất của hai số
@@ -185,10 +185,40 @@ SELECT dbo.KiemTraSoLonNhat(12, 7496, 23, 46679)
 --	  Nếu sử dụng dưới 100 số đơn giá là 500đ
 --	  Từ 100 số đến dưới 200 số giá là 1000đ
 --	  Từ số thứ 200 trở nên giá là 2000đ
+CREATE FUNCTION TienDien(@soDien INT)
+RETURNS INT
+AS
+BEGIN
+	DEClARE @tienDien INT
+	SET @tienDien = 0
+	IF @soDien < 100
+		SET @tienDien = @soDien * 500
+	ELSE IF @soDien BETWEEN 100 AND 200
+		SET @tienDien = 100 * 500 + (@soDien - 100) * 1000
+	ELSE
+		SET @tienDien = 100 * 500 + 100 * 1000 + (@soDien - 200) * 2000
+	RETURN @tienDien
+END
+
+SELECT dbo.TienDien(200) AS N'Tiền điện'
 
 -- 5. Viết hàm tính cước điện thoại dưới 201 phút giá là 200đ/p
 --	  Từ phút thứ 201 trở đi giá là 100đ/p
 --	  Thuê bao cố định là 27000đ/tháng
+CREATE FUNCTION CuocDienThoai(@soPhutGoi INT)
+RETURNS INT
+AS
+BEGIN
+	DECLARE @cuocDienThoai INT
+	SET @cuocDienThoai = 0
+	IF @soPhutGoi < 201
+		SET @cuocDienThoai = @soPhutGoi * 200
+	ELSE
+		SET @cuocDienThoai = 201 * 200 + (@soPhutGoi - 201) * 100
+	RETURN @cuocDienThoai
+END
+
+SELECT dbo.CuocDienThoai(500) AS N'Cước điện thoại'
 
 -- 6. Viết hàm kiểm tra một số có phải số nguyên tố không
 CREATE FUNCTION KiemTraSoNguyenTo(@a INT)
@@ -218,9 +248,56 @@ END
 SELECT dbo.KiemTraSoNguyenTo(5)
 
 -- 7. Viết thủ tục tìm các số nguyên tố nằm giữa 2 và n
-CREATE PROCEDURE SoNguyenTo(@a INT, @b INT)
+CREATE PROCEDURE SoNguyenTo(@n INT)
 AS
+DECLARE @i INT
+SET @i = 2
+WHILE @i < @n
+BEGIN
+	IF dbo.KiemTraSoNguyenTo(@i) = 1
+		PRINT @i
+		SET @i = @i + 1
+END
+
+EXEC SoNguyenTo 20
 
 -- 8. Viết thủ tục tìm các số hoàn hảo nằm giữa 2 và n
---	  + Viết bình thường
---	  + Trong thủ tục có gọi đến hàm kiểm tra một số có phải số hoàn hảo không
+-- + Viết bình thường
+ALTER PROCEDURE PR_KiemTraSoHoanHao(@n INT)
+AS
+DECLARE @i INT
+DECLARE @tongUoc INT
+DECLARE @kq BIT
+SET @i = 1
+SET @tongUoc = 0
+WHILE @i < @n
+	BEGIN
+		IF @n % @i = 0
+		BEGIN
+			SET @tongUoc = @tongUoc + @i
+		END
+		SET @i = @i + 1
+	END
+IF @tongUoc = @n
+	SET @kq = 1
+ELSE
+	SET @kq = 0
+RETURN @kq
+
+DECLARE @soHoanHao INT
+EXEC  @soHoanHao = PR_KiemTraSoHoanHao 28
+PRiNT @soHoanHao
+
+-- + Trong thủ tục có gọi đến hàm kiểm tra một số có phải số hoàn hảo không
+CREATE PROCEDURE SoHoanHao(@n INT)
+AS
+DECLARE @i INT
+SET @i = 0
+WHILE @i < @n
+BEGIN
+	IF dbo.KiemTraSoHoanHao(@i) = 1
+		PRINT @i
+		SET @i = @i + 1
+END
+
+EXEC SoHoanHao 500

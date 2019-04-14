@@ -142,8 +142,44 @@ SELECT @x AS N'Ước chung lớn nhất'
 -- 1. Viết hàm tìm bội chung nhỏ nhất của 2 số
 
 -- 2. Viết hàm đưa ra ngày của tháng x, năm y
+CREATE FUNCTION TinhSoNgay(@month INT, @year INT)
+RETURNS INT
+AS 
+BEGIN
+	DECLARE @day INT
+	IF @month IN (1, 3, 5, 7, 8, 10, 12)
+		SET @day = 31
+	ELSE IF @month IN (4, 6, 9, 11)
+		SET @day = 30
+	ELSE
+		BEGIN
+			IF (@year % 4 = 0)
+				SET @day = 29
+			ELSE
+				SET @day = 28
+		END
+	RETURN @day
+END
+
+SELECT dbo.TinhSoNgay(3, 2014)
 
 -- 3. Viết hàm tìm ra số lớn nhất trong 4 số nhập vào
+CREATE FUNCTION KiemTraSoLonNhat(@a INT, @b INT, @c INT, @d INT)
+RETURNS INT
+AS
+BEGIN
+	DECLARE @max INT
+	SET @max = @a
+	IF @b > @max
+		SET @max = @b
+	IF @c > @max
+		SET @max = @c
+	IF @d > @max
+		SET @max = @d
+	RETURN @max
+END
+
+SELECT dbo.KiemTraSoLonNhat(12, 7496, 23, 46679)
 
 -- 4. Viết hàm tính tiền điện cho khách hàng:
 --	  Nếu sử dụng dưới 100 số đơn giá là 500đ
@@ -155,8 +191,35 @@ SELECT @x AS N'Ước chung lớn nhất'
 --	  Thuê bao cố định là 27000đ/tháng
 
 -- 6. Viết hàm kiểm tra một số có phải số nguyên tố không
+CREATE FUNCTION KiemTraSoNguyenTo(@a INT)
+RETURNS BIT
+AS
+BEGIN
+	DECLARE @kq BIT
+	SET @kq = 0
+	IF @a < 2
+		SET @kq = 0
+	ELSE
+		DECLARE @i INT
+		SET @i = 2
+		WHILE @i < @a
+			BEGIN
+				IF @a % @i = 0
+					BEGIN
+						SET @kq = 0
+						BREAK
+					END
+				SET @i = @i + 1
+				SET @kq = 1
+			END
+	RETURN @kq
+END
+
+SELECT dbo.KiemTraSoNguyenTo(5)
 
 -- 7. Viết thủ tục tìm các số nguyên tố nằm giữa 2 và n
+CREATE PROCEDURE SoNguyenTo(@a INT, @b INT)
+AS
 
 -- 8. Viết thủ tục tìm các số hoàn hảo nằm giữa 2 và n
 --	  + Viết bình thường
